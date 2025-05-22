@@ -1,3 +1,4 @@
+import 'package:bike_rental_pos/services/customer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,17 +22,6 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> {
   final _nameController = TextEditingController();
   // final _priceController = TextEditingController(text: '45');
   final _durationController = TextEditingController(text: '1');
-  final double pricePerHour = 50; // سعر الساعة مثلاً 50 جنيه
-  final String _selectedProduct = 'دراجة هوائية';
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
-
-  final List<String> _products = [
-    'دراجة هوائية',
-    'دراجة نارية',
-    'سكوتر كهربائي',
-    'عجل أطفال',
-  ];
 
   @override
   void dispose() {
@@ -42,62 +32,19 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> {
     super.dispose();
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
-  }
+  final CustomerService _customerService = CustomerService();
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedTime = picked;
-      });
+  Future<void> _checkCustomer(String phone) async {
+    if (phone.length == 11) {
+      try {
+        final customer = await _customerService.getCustomerByPhone(phone);
+        if (customer != null) {
+          setState(() {
+            _nameController.text = customer.name;
+          });
+        }
+      } catch (e) {}
     }
-  }
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم إنشاء الفاتورة بنجاح'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  Widget _buildInvoiceRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(value),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -144,6 +91,11 @@ class _NewInvoiceScreenState extends State<NewInvoiceScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _phoneController,
+              onChanged: (value) {
+                if (value.length == 11) {
+                  _checkCustomer(value);
+                }
+              },
               decoration: InputDecoration(
                 labelText: 'رقم الهاتف',
                 prefixIcon: const Icon(Icons.phone),

@@ -1,10 +1,10 @@
 name: bike_rental_pos
 description: A POS application for bike rental by the hour
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -12,7 +12,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  flutter_launcher_icons: ^0.14.3  # تحديث الإصدار إلى النسخة الأخيرة المتوافقة
+  flutter_launcher_icons: ^0.14.3 # تحديث الإصدار إلى النسخة الأخيرة المتوافقة
   # UI Components
   cupertino_icons: ^1.0.2
   curved_navigation_bar: ^1.0.3
@@ -49,10 +49,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/logo.png
-    - assets/icons/
 
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/images/img.png"
-

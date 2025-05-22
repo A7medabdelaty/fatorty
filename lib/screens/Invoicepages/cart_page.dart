@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../constants/widgets.dart';
 import '../../models/bike.dart';
-import 'InvoicePage.dart';
+import 'invoice_page.dart';
 
 class CartPage extends StatefulWidget {
   final Map<Bike, int> selectedBikes;

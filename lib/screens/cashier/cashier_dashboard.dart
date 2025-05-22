@@ -1,9 +1,10 @@
 import 'package:bike_rental_pos/constants/colour.dart';
+import 'package:bike_rental_pos/screens/cashier/new_rental.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 import '../../constants/widgets.dart';
-import '../Invoicepages/NewInvoiceScreen.dart';
+import '../Invoicepages/new_invoice_screen.dart';
 import '../admin/reports_analytics.dart';
 import 'Setting_page.dart';
 import 'community.dart';
@@ -129,7 +130,14 @@ class HomePage extends StatelessWidget {
               title: 'الاشتراكات',
               icon: Icons.subscriptions,
               color: Colors.purple,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NewRentalScreen(),
+                  ),
+                );
+              },
             ),
           ],
         ),

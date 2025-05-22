@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter/material.dart';
+
 import '../../constants/colour.dart';
 import '../../constants/widgets.dart';
-import '../Invoicepages/NewInvoiceScreen.dart';
+import '../../screens/admin/invoices_management.dart';
+import '../../screens/admin/manage_bikes.dart';
+import '../../screens/admin/manage_cashiers.dart';
+import '../../screens/admin/pricing_management.dart';
+import '../../screens/admin/reports_analytics.dart';
+import '../Invoicepages/new_invoice_screen.dart';
 import '../cashier/community.dart';
 import '../cashier/setting_page.dart';
-import '../../screens/admin/manage_cashiers.dart';
-import '../../screens/admin/manage_bikes.dart';
-import '../../screens/admin/pricing_management.dart';
-import '../../screens/admin/invoices_management.dart';
-import '../../screens/admin/reports_analytics.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -82,7 +83,7 @@ class AdminHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'الصفحة الرئيسية',
       ),
       body: Padding(
@@ -104,7 +105,6 @@ class AdminHomePage extends StatelessWidget {
                 ),
               ),
             ),
-
             DashboardCard(
               title: 'إدارة الكاشير',
               icon: Icons.people,

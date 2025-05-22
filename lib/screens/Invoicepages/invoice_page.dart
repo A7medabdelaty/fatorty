@@ -8,6 +8,10 @@ import 'package:sunmi_printer_plus/core/sunmi/sunmi_printer.dart';
 
 import '../../constants/widgets.dart';
 import '../../models/bike.dart';
+import '../../models/customer.dart';
+import '../../models/invoice.dart';
+import '../../services/customer_service.dart';
+import '../../services/invoice_service.dart';
 
 class InvoicePage extends StatefulWidget {
   final String customerName;
@@ -39,10 +43,15 @@ class InvoicePage extends StatefulWidget {
 
 class _InvoicePageState extends State<InvoicePage> {
   double customerRating = 0.0;
+  final CustomerService _customerService = CustomerService();
+  final InvoiceService _invoiceService = InvoiceService();
+  bool _isSaving = false;
+  String? _errorMessage;
+  int? _savedCustomerId;
+
   @override
   void initState() {
     SunmiPrinter.initPrinter();
-
     super.initState();
   }
 
@@ -210,10 +219,7 @@ class _InvoicePageState extends State<InvoicePage> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             child: ElevatedButton(
-              onPressed: () {
-                // هنا سنضيف الكود للطباعة عند الضغط على "تأكيد"
-                printInvoice();
-              },
+              onPressed: _isSaving ? null : printInvoice,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF008080),
                 minimumSize: const Size(double.infinity, 50),
@@ -221,14 +227,16 @@ class _InvoicePageState extends State<InvoicePage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                'تأكيد',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              child: _isSaving
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text(
+                      'تأكيد',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -237,6 +245,99 @@ class _InvoicePageState extends State<InvoicePage> {
   }
 
   Future<void> printInvoice() async {
+    setState(() {
+      _isSaving = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final customerId = await _getOrCreateCustomer();
+      _savedCustomerId = customerId;
+
+      // 2. حفظ الفاتورة لكل دراجة
+      for (var entry in widget.selectedBikes.entries) {
+        final bike = entry.key;
+        final quantity = entry.value;
+        final duration = widget.selectedDurations[bike] ?? '30 دقيقة';
+        final price = widget.durationPrices[duration] ?? 0;
+        final totalAmount = price * quantity * (bike.pricePerHour / 60);
+
+        // استخدام قيمة افتراضية للكاشير (1) حتى يتم تنفيذ نظام المصادقة الكامل
+        // في التطبيق الحقيقي، يجب الحصول على معرف الكاشير من نظام المصادقة
+        const cashierId =
+            1; // TODO: استبدال بمعرف الكاشير الفعلي من نظام المصادقة
+
+        final invoice = Invoice(
+          cashierId: cashierId,
+          bikeId: bike.id!,
+          customerId: customerId,
+          startTime: widget.pickupTime,
+          endTime: widget.deliveryTimes[bike],
+          totalHours: _calculateTotalHours(
+              widget.pickupTime, widget.deliveryTimes[bike]),
+          totalAmount: totalAmount,
+          status: 'نشط', // الحالة الأولية للفاتورة
+        );
+
+        await _invoiceService.addInvoice(invoice);
+      }
+
+      // 3. طباعة الفاتورة
+      //await _printReceiptToSunmiPrinter();
+
+      // 4. عرض رسالة نجاح
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم حفظ الفاتورة وطباعتها بنجاح'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'فشل في حفظ الفاتورة: ${e.toString()}';
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_errorMessage!),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isSaving = false;
+      });
+    }
+  }
+
+  Future<int> _getOrCreateCustomer() async {
+    try {
+      final existingCustomer =
+          await _customerService.getCustomerByPhone(widget.customerPhone);
+
+      if (existingCustomer != null) {
+        return existingCustomer.id!;
+      }
+
+      final newCustomer = Customer(
+        name: widget.customerName,
+        phone: widget.customerPhone,
+      );
+
+      final customerId = await _customerService.addCustomer(newCustomer);
+      return customerId;
+    } catch (e) {
+      throw Exception('فشل في حفظ بيانات العميل: ${e.toString()}');
+    }
+  }
+
+  int? _calculateTotalHours(DateTime startTime, DateTime? endTime) {
+    if (endTime == null) return null;
+
+    final difference = endTime.difference(startTime);
+    return (difference.inMinutes / 60).ceil(); // تقريب لأقرب ساعة
+  }
+
+  Future<void> _printReceiptToSunmiPrinter() async {
     await SunmiPrinter.bindingPrinter();
 
     final byteData = await rootBundle.load('assets/images/logo.jpg');
@@ -244,8 +345,6 @@ class _InvoicePageState extends State<InvoicePage> {
     img.Image? original = img.decodeImage(bytes);
 
     final now = DateTime.now();
-    final pickupTime = now;
-    final returnTime = now.add(Duration(minutes: getTotalDurationInMinutes()));
 
     // --- Header with Logo and Business Name ---
     await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);

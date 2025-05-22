@@ -92,7 +92,6 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    print('creating db');
     try {
       await db.transaction((txn) async {
         // جدول الكاشير
