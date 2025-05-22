@@ -81,15 +81,3 @@ class Bike {
   @override
   int get hashCode => id.hashCode ^ name.hashCode;
 }
-
-IconData? _getIconData(String? iconName) {
-  switch (iconName) {
-    case 'pedal_bike':
-      return Icons.pedal_bike;
-    case 'electric_bike':
-      return Icons.electric_bike;
-    // أضف المزيد حسب الحاجة
-    default:
-      return Icons.directions_bike;
-  }
-}

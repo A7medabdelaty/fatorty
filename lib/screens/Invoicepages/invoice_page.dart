@@ -23,6 +23,7 @@ class InvoicePage extends StatefulWidget {
   final DateTime pickupTime; // استقبال pickupTime
   //final DateTime deliveryTime;  // استقبال deliveryTime
   final Map<Bike, DateTime> deliveryTimes;
+  final bool isSubscription;
 
   const InvoicePage({
     Key? key,
@@ -35,6 +36,7 @@ class InvoicePage extends StatefulWidget {
     required this.pickupTime,
     //required this.deliveryTime,
     required this.deliveryTimes,
+    this.isSubscription = false,
   }) : super(key: key);
 
   @override

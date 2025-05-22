@@ -8,12 +8,18 @@ class CartPage extends StatefulWidget {
   final Map<Bike, int> selectedBikes;
   final String customerName;
   final String customerPhone;
+  final bool isSubscription;
+  final Map<Bike, String>? initialDurations;
+  final Map<String, int>? subscriptionPrices;
 
   const CartPage({
     Key? key,
     required this.selectedBikes,
     required this.customerName,
     required this.customerPhone,
+    this.isSubscription = false,
+    this.initialDurations,
+    this.subscriptionPrices,
   }) : super(key: key);
 
   @override
@@ -22,44 +28,80 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   final Map<Bike, String> _selectedDurations = {};
-  final Map<String, int> _durationPrices = {
-    '15 دقيقة': 15,
-    '30 دقيقة': 30,
-    'ساعة واحدة': 60,
-    'ساعتين': 120,
-  };
+  late Map<String, int> _durationPrices;
 
   @override
   void initState() {
     super.initState();
-    for (var bike in widget.selectedBikes.keys) {
-      _selectedDurations[bike] = '30 دقيقة';
+
+    // Initialize duration prices based on rental type
+    if (widget.isSubscription && widget.subscriptionPrices != null) {
+      _durationPrices = widget.subscriptionPrices!;
+    } else {
+      _durationPrices = {
+        '15 دقيقة': 15,
+        '30 دقيقة': 30,
+        'ساعة واحدة': 60,
+        'ساعتين': 120,
+      };
+    }
+
+    // Initialize selected durations
+    if (widget.initialDurations != null) {
+      _selectedDurations.addAll(widget.initialDurations!);
+    } else {
+      for (var bike in widget.selectedBikes.keys) {
+        _selectedDurations[bike] =
+            widget.isSubscription ? 'نصف شهر' : '30 دقيقة';
+      }
     }
   }
 
   double calculateTotal() {
     double total = 0;
     widget.selectedBikes.forEach((bike, quantity) {
-      final durationPrice = (_durationPrices[_selectedDurations[bike]]! *
-              (bike.pricePerHour / 60))
-          .round();
-      total += durationPrice * quantity;
+      if (widget.isSubscription) {
+        // For subscriptions, use the bike.price directly
+        final durationDays = _durationPrices[_selectedDurations[bike]!]!;
+        final price = (bike.price ?? 0) *
+            (durationDays == 30
+                ? 1
+                : 0.6); // 60% of monthly price for half month
+        total += price * quantity;
+      } else {
+        // For hourly rentals, calculate based on hourly rate
+        final durationPrice = (_durationPrices[_selectedDurations[bike]]! *
+                (bike.pricePerHour / 60))
+            .round();
+        total += durationPrice * quantity;
+      }
     });
     return total;
   }
 
   Duration parseDuration(String durationText) {
-    switch (durationText) {
-      case '15 دقيقة':
-        return const Duration(minutes: 15);
-      case '30 دقيقة':
-        return const Duration(minutes: 30);
-      case 'ساعة واحدة':
-        return const Duration(hours: 1);
-      case 'ساعتين':
-        return const Duration(hours: 2);
-      default:
-        return const Duration(minutes: 30);
+    if (widget.isSubscription) {
+      switch (durationText) {
+        case 'نصف شهر':
+          return const Duration(days: 15);
+        case 'شهر كامل':
+          return const Duration(days: 30);
+        default:
+          return const Duration(days: 15);
+      }
+    } else {
+      switch (durationText) {
+        case '15 دقيقة':
+          return const Duration(minutes: 15);
+        case '30 دقيقة':
+          return const Duration(minutes: 30);
+        case 'ساعة واحدة':
+          return const Duration(hours: 1);
+        case 'ساعتين':
+          return const Duration(hours: 2);
+        default:
+          return const Duration(minutes: 30);
+      }
     }
   }
 
@@ -77,7 +119,8 @@ class _CartPageState extends State<CartPage> {
               itemBuilder: (context, index) {
                 final bike = widget.selectedBikes.keys.elementAt(index);
                 final quantity = widget.selectedBikes[bike]!;
-                final currentDuration = _selectedDurations[bike] ?? '30 دقيقة';
+                final currentDuration = _selectedDurations[bike] ??
+                    (widget.isSubscription ? 'نصف شهر' : '30 دقيقة');
 
                 return Card(
                   margin:
@@ -114,8 +157,9 @@ class _CartPageState extends State<CartPage> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(duration),
-                                  Text(
-                                      '${_durationPrices[duration]! * bike.pricePerHour / 60} ريال'),
+                                  Text(widget.isSubscription
+                                      ? '${bike.price! * (_durationPrices[duration]! == 30 ? 1 : 0.6)} ريال'
+                                      : '${_durationPrices[duration]! * bike.pricePerHour / 60} ريال'),
                                 ],
                               ),
                             );
@@ -133,7 +177,9 @@ class _CartPageState extends State<CartPage> {
                             const Text('المجموع:',
                                 style: TextStyle(fontSize: 16)),
                             Text(
-                              '${((_durationPrices[currentDuration]! * bike.pricePerHour / 60) * quantity)} ريال',
+                              widget.isSubscription
+                                  ? '${(bike.price! * (_durationPrices[currentDuration]! == 30 ? 1 : 0.6) * quantity)} ريال'
+                                  : '${((_durationPrices[currentDuration]! * bike.pricePerHour / 60) * quantity)} ريال',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -204,7 +250,8 @@ class _CartPageState extends State<CartPage> {
                           durationPrices: _durationPrices,
                           totalAmount: total,
                           pickupTime: pickupTime,
-                          deliveryTimes: deliveryTimes, // أرسل الخريطة الجديدة
+                          deliveryTimes: deliveryTimes,
+                          isSubscription: widget.isSubscription,
                         ),
                       ),
                     );
