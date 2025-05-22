@@ -52,4 +52,18 @@ class Invoice {
       createdAt: DateTime.parse(map['created_at']),
     );
   }
+
+  bool isLateDelivery() {
+    if (status == 'مكتمل') return false;
+    //if (endTime != null) return false;
+
+    if (totalHours != null) {
+      final expectedEndTime = startTime.add(Duration(minutes: totalHours!));
+      return DateTime.now().isAfter(expectedEndTime);
+    }
+
+    const defaultDuration = Duration(minutes: 30);
+    final expectedEndTime = startTime.add(defaultDuration);
+    return DateTime.now().isAfter(expectedEndTime);
+  }
 }

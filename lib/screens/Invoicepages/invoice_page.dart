@@ -278,14 +278,14 @@ class _InvoicePageState extends State<InvoicePage> {
           totalHours: _calculateTotalHours(
               widget.pickupTime, widget.deliveryTimes[bike]),
           totalAmount: totalAmount,
-          status: 'نشط', // الحالة الأولية للفاتورة
+          status: 'نشط',
         );
 
         await _invoiceService.addInvoice(invoice);
       }
 
       // 3. طباعة الفاتورة
-      //await _printReceiptToSunmiPrinter();
+      await _printReceiptToSunmiPrinter();
 
       // 4. عرض رسالة نجاح
       ScaffoldMessenger.of(context).showSnackBar(
@@ -336,7 +336,7 @@ class _InvoicePageState extends State<InvoicePage> {
     if (endTime == null) return null;
 
     final difference = endTime.difference(startTime);
-    return (difference.inMinutes / 60).ceil(); // تقريب لأقرب ساعة
+    return (difference.inMinutes).ceil(); // تقريب لأقرب ساعة
   }
 
   Future<void> _printReceiptToSunmiPrinter() async {

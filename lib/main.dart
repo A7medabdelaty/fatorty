@@ -1,12 +1,16 @@
 import 'package:bike_rental_pos/screens/splash_screen.dart';
+import 'package:bike_rental_pos/services/notification_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'providers/auth_provider.dart';
-import 'blocs/auth/auth_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+
+import 'blocs/auth/auth_bloc.dart';
+import 'providers/auth_provider.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  NotificationService().initialize();
   runApp(const MyApp());
 }
 
