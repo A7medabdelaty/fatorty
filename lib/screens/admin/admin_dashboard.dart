@@ -24,7 +24,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
   final PageController _pageController = PageController(initialPage: 1);
 
   final List<Widget> _pages = [
-    CommunityScreen(), //  ممكن تحط صفحة الشات هنا لاحقًا
+    const CommunityScreen(), //  ممكن تحط صفحة الشات هنا لاحقًا
     const AdminHomePage(), // الصفحة الرئيسية
     const SettingsPanel(), // الإعدادات
   ];

@@ -22,7 +22,7 @@ class _CashierDashboardState extends State<CashierDashboard> {
   final PageController _pageController = PageController(initialPage: 1);
 
   final List<Widget> _pages = [
-    CommunityScreen(), // يمكنك لاحقًا وضع صفحة الدردشة هنا
+    const CommunityScreen(), // يمكنك لاحقًا وضع صفحة الدردشة هنا
     const HomePage(), // الصفحة الرئيسية
     const SettingsPanel(), // صفحة الإعدادات
   ];

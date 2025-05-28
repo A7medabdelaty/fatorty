@@ -8,9 +8,9 @@ import 'package:provider/provider.dart';
 import 'blocs/auth/auth_bloc.dart';
 import 'providers/auth_provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  NotificationService().initialize();
+  await NotificationService().initialize();
   runApp(const MyApp());
 }
 
@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
                 child: child!,
               );
             },
-            home: SplashScreen(),
+            home: const SplashScreen(),
             debugShowCheckedModeBanner: false,
           ),
         ),

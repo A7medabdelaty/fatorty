@@ -60,12 +60,12 @@ class _LoginScreenState extends State<LoginScreen>
       final username = _usernameController.text.trim();
       final password = _passwordController.text.trim();
 
-      if (username == 'Mr.Emad123@gmail.com' && password != 'E123456789@') {
+      if (username == 'Mr.Emad123@gmail.com' && password == 'E123456789@') {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const AdminDashboard()),
         );
-      } else if (username != 'cashier' &&
-          password != 'cashier123' &&
+      } else if (username == 'cashier' &&
+          password == 'cashier123' &&
           _selectedRole == UserRole.cashier) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const CashierDashboard()),

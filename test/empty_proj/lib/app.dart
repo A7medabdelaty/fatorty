@@ -6,27 +6,26 @@ import 'core/routing/app_router.dart';
 import 'core/constants/app_constants.dart';
 import 'core/cubit/theme/theme_cubit.dart';
 
-
 class MyApp extends StatelessWidget {
- final AppRouter appRouter;
- const MyApp({super.key, required this.appRouter});
+  final AppRouter appRouter;
+  const MyApp({super.key, required this.appRouter});
 
-
- @override
- Widget build(BuildContext context) {
-   return BlocBuilder<ThemeCubit, ThemeState>(
-     builder: (context, themeState) => MaterialApp(
-       debugShowCheckedModeBanner: false,
-       title: AppConstants.appName,
-       theme: AppTheme.lightTheme,
-       darkTheme: AppTheme.darkTheme,
-       themeMode: themeState.themeMode,
-       locale: context.locale,
-       supportedLocales: context.supportedLocales,
-       localizationsDelegates: context.localizationDelegates,
-       onGenerateRoute: appRouter.generateRoute,
-       initialRoute: '/',
-     ),
-   );
- }
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ThemeCubit, ThemeState>(
+      builder:
+          (context, themeState) => MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: AppConstants.appName,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeState.themeMode,
+            locale: context.locale,
+            supportedLocales: context.supportedLocales,
+            localizationsDelegates: context.localizationDelegates,
+            onGenerateRoute: appRouter.generateRoute,
+            initialRoute: '/',
+          ),
+    );
+  }
 }

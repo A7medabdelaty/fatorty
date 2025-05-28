@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'colour.dart';
+
 Widget buildTextField({
   required TextEditingController controller,
   required String label,
@@ -27,7 +28,6 @@ Widget buildTextField({
     },
   );
 }
-
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -58,12 +58,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: leading ??
           (showBackButton
               ? IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: textColor ?? Colors.white,
-            ),
-            onPressed: () => Navigator.pop(context),
-          )
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: textColor ?? Colors.white,
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                )
               : null),
       title: Align(
         alignment: Alignment.centerRight,
@@ -83,6 +83,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+
 class DashboardCard extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -90,6 +91,7 @@ class DashboardCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const DashboardCard({
+    super.key,
     required this.title,
     required this.icon,
     required this.color,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants/widgets.dart';
 import '../login_screen.dart';
@@ -19,7 +18,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
   bool _biometricEnabled = false;
-  String _selectedTheme = 'system';
+  final String _selectedTheme = 'system';
   String _selectedFontSize = 'medium';
   bool _isRTL = true;
 
@@ -29,7 +28,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
     final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'الاعدادات',
       ),
       body: CustomScrollView(
@@ -356,9 +355,9 @@ class _SettingsPanelState extends State<SettingsPanel> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('الملف الشخصي'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             ListTile(
               leading: Icon(Icons.person),
               title: Text('محمد أحمد'),
@@ -389,28 +388,28 @@ class _SettingsPanelState extends State<SettingsPanel> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('تغيير كلمة المرور'),
-        content: Column(
+        content: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               obscureText: true,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'كلمة المرور الحالية',
                 prefixIcon: Icon(Icons.lock),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             TextField(
               obscureText: true,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'كلمة المرور الجديدة',
                 prefixIcon: Icon(Icons.lock_outline),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             TextField(
               obscureText: true,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'تأكيد كلمة المرور الجديدة',
                 prefixIcon: Icon(Icons.lock_reset),
               ),
@@ -584,7 +583,7 @@ class _SettingsPanelState extends State<SettingsPanel> {
             onPressed: () {
               Navigator.pop(context);
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
                 (route) => false,
               );
             },

@@ -36,7 +36,7 @@ class _ReportsAnalyticsScreenState extends State<ReportsAnalyticsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'التقارير والتحليلات',
       ),
       body: SingleChildScrollView(

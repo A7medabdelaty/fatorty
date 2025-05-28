@@ -84,10 +84,12 @@ class Cashier {
     if (name.isEmpty) return false;
     if (password.isEmpty) return false;
     if (email != null &&
-        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email!))
+        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email!)) {
       return false;
-    if (phone != null && !RegExp(r'^\+?[\d\s-]{10,}$').hasMatch(phone!))
+    }
+    if (phone != null && !RegExp(r'^\+?[\d\s-]{10,}$').hasMatch(phone!)) {
       return false;
+    }
     return true;
   }
 }

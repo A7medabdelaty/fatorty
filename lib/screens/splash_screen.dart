@@ -1,8 +1,9 @@
 import 'package:bike_rental_pos/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
-
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -19,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
     // تهيئة الأنيميشن
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1000),
     );
 
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -29,11 +30,12 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     // الانتقال بعد ثانيتين
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          transitionDuration: Duration(milliseconds: 800),
-          pageBuilder: (context, animation, secondaryAnimation) => LoginScreen(),
+          transitionDuration: const Duration(milliseconds: 800),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const LoginScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity: animation,
@@ -62,7 +64,8 @@ class _SplashScreenState extends State<SplashScreen>
             'assets/images/splashscrean.png',
             width: double.infinity, // لتغطية العرض بالكامل
             height: double.infinity, // لتغطية الارتفاع بالكامل
-            fit: BoxFit.cover, // لتغطية الشاشة بالكامل مع الحفاظ على نسبة الطول/العرض
+            fit: BoxFit
+                .cover, // لتغطية الشاشة بالكامل مع الحفاظ على نسبة الطول/العرض
           ),
         ),
       ),

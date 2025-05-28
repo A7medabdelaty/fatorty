@@ -9,24 +9,24 @@ import 'core/routing/app_router.dart';
 import 'app.dart';
 import 'app_bloc_observer.dart';
 
-
 void main() async {
- WidgetsFlutterBinding.ensureInitialized();
- await EasyLocalization.ensureInitialized();
- Bloc.observer = AppBlocObserver();
- await AppPreferences().init();
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+  Bloc.observer = AppBlocObserver();
+  await AppPreferences().init();
 
-
- runApp(EasyLocalization(
-   supportedLocales: AppConstants.supportedLocales,
-   path: 'assets/lang',
-   fallbackLocale: const Locale('en'),
-   child: MultiBlocProvider(
-     providers: [
-       BlocProvider(create: (_) => LocaleCubit()),
-       BlocProvider(create: (_) => ThemeCubit()),
-     ],
-     child: MyApp(appRouter: AppRouter()),
-   ),
- ));
+  runApp(
+    EasyLocalization(
+      supportedLocales: AppConstants.supportedLocales,
+      path: 'assets/lang',
+      fallbackLocale: const Locale('en'),
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => LocaleCubit()),
+          BlocProvider(create: (_) => ThemeCubit()),
+        ],
+        child: MyApp(appRouter: AppRouter()),
+      ),
+    ),
+  );
 }

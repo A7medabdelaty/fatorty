@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../constants/colour.dart';
 import '../../constants/widgets.dart';
 
 class PricingManagementScreen extends StatefulWidget {
@@ -51,7 +50,7 @@ class _PricingManagementScreenState extends State<PricingManagementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'إدارة الأسعار',
       ),
       body: ListView.builder(

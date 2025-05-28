@@ -28,25 +28,18 @@ class _CommunityScreenState extends State<CommunityScreen> {
   bool _isLoading = true;
   String _selectedFilter = 'الكل';
   Timer? _lateCheckTimer;
+  final NotificationService _notificationService = NotificationService();
 
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     _fetchInvoices();
     _startLateCheck();
   }
 
-  @override
-  void dispose() {
-    _lateCheckTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startLateCheck() {
-    // Check every minute for late rentals
-    _lateCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      _checkForLateRentals();
-    });
+  Future<void> _initializeNotifications() async {
+    await _notificationService.initialize();
   }
 
   Future<void> _checkForLateRentals() async {
@@ -82,14 +75,26 @@ class _CommunityScreenState extends State<CommunityScreen> {
           data['invoice'] = updatedInvoice;
         });
 
-        // Start periodic notifications
-        NotificationService().startPeriodicLateDeliveryNotification(
-          invoice.id.toString(),
+        // Show immediate notification for late delivery
+        await _notificationService.showLateDeliveryNotification(
           customer.name,
           bike.name,
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _lateCheckTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startLateCheck() {
+    // Check every minute for late rentals
+    _lateCheckTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      _checkForLateRentals();
+    });
   }
 
   Future<void> _fetchInvoices() async {
@@ -178,7 +183,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     // Stop periodic notifications if status changes
     if (status != 'متأخر') {
-      NotificationService().stopPeriodicNotification(invoice.id.toString());
+      _notificationService.stopPeriodicNotification(invoice.id.toString());
     }
 
     _fetchInvoices();
@@ -191,15 +196,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
     final bike = data['bike'] as Bike;
     final isLate = invoice.status == 'متأخر';
 
+    // In _showInvoiceDetails method
     if (isLate) {
-      NotificationService().startPeriodicLateDeliveryNotification(
+      _notificationService.startPeriodicLateDeliveryNotification(
         invoice.id.toString(),
         customer.name,
         bike.name,
       );
     } else {
-      // Stop notifications if status is not late
-      NotificationService().stopPeriodicNotification(invoice.id.toString());
+      _notificationService.stopPeriodicNotification(invoice.id.toString());
     }
 
     showModalBottomSheet(
