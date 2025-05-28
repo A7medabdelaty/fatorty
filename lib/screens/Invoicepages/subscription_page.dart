@@ -147,7 +147,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'السعر: ${bike.price} ريال',
+                                      'السعر: ${bike.supscriptionPrice} ريال',
                                       style: const TextStyle(fontSize: 14),
                                     ),
                                     const SizedBox(height: 8),

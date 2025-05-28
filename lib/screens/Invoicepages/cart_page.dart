@@ -61,18 +61,40 @@ class _CartPageState extends State<CartPage> {
     double total = 0;
     widget.selectedBikes.forEach((bike, quantity) {
       if (widget.isSubscription) {
-        // For subscriptions, use the bike.price directly
+        // For subscriptions, use the bike.supscriptionPrice directly
         final durationDays = _durationPrices[_selectedDurations[bike]!]!;
-        final price = (bike.price ?? 0) *
+        final price = (bike.supscriptionPrice ?? 0) *
             (durationDays == 30
                 ? 1
                 : 0.6); // 60% of monthly price for half month
         total += price * quantity;
       } else {
-        // For hourly rentals, calculate based on hourly rate
-        final durationPrice = (_durationPrices[_selectedDurations[bike]]! *
-                (bike.pricePerHour / 60))
-            .round();
+        // For regular rentals, use the appropriate price based on duration
+        final duration = _selectedDurations[bike]!;
+        double durationPrice = 0;
+
+        switch (duration) {
+          case '15 دقيقة':
+            // 15-minute price is half-hour price divided by 0.5
+            durationPrice =
+                ((bike.pricePerHalfHour ?? (bike.pricePerHour / 2)) / 0.5);
+            break;
+          case '30 دقيقة':
+            durationPrice = bike.pricePerHalfHour ?? (bike.pricePerHour / 2);
+            break;
+          case 'ساعة واحدة':
+            durationPrice = bike.pricePerHour;
+            break;
+          case 'ساعتين':
+            durationPrice = bike.pricePerTwoHours ?? (bike.pricePerHour * 2);
+            break;
+          default:
+            // Fallback to hourly rate calculation
+            final durationMinutes = _durationPrices[duration]!;
+            durationPrice = (durationMinutes * (bike.pricePerHour / 60));
+            break;
+        }
+
         total += durationPrice * quantity;
       }
     });
@@ -158,7 +180,7 @@ class _CartPageState extends State<CartPage> {
                                 children: [
                                   Text(duration),
                                   Text(widget.isSubscription
-                                      ? '${bike.price! * (_durationPrices[duration]! == 30 ? 1 : 0.6)} ريال'
+                                      ? '${bike.supscriptionPrice! * (_durationPrices[duration]! == 30 ? 1 : 0.6)} ريال'
                                       : '${_durationPrices[duration]! * bike.pricePerHour / 60} ريال'),
                                 ],
                               ),
@@ -178,7 +200,7 @@ class _CartPageState extends State<CartPage> {
                                 style: TextStyle(fontSize: 16)),
                             Text(
                               widget.isSubscription
-                                  ? '${(bike.price! * (_durationPrices[currentDuration]! == 30 ? 1 : 0.6) * quantity)} ريال'
+                                  ? '${(bike.supscriptionPrice! * (_durationPrices[currentDuration]! == 30 ? 1 : 0.6) * quantity)} ريال'
                                   : '${((_durationPrices[currentDuration]! * bike.pricePerHour / 60) * quantity)} ريال',
                               style: const TextStyle(
                                 fontSize: 18,

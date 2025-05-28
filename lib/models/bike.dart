@@ -9,8 +9,9 @@ class Bike {
   final DateTime createdAt;
   // خصائص اختيارية لبعض الشاشات
   final IconData icon;
-  final double? hourlyRate;
-  final double? price;
+  final double? pricePerHalfHour;
+  final double? pricePerTwoHours;
+  final double? supscriptionPrice;
   final String? description;
 
   Bike({
@@ -21,8 +22,9 @@ class Bike {
     required this.pricePerHour,
     DateTime? createdAt,
     required this.icon,
-    this.hourlyRate,
-    this.price,
+    this.pricePerHalfHour,
+    this.pricePerTwoHours,
+    this.supscriptionPrice,
     this.description,
   }) : createdAt = createdAt ?? DateTime.now();
 
@@ -35,8 +37,9 @@ class Bike {
       'price_per_hour': pricePerHour,
       'created_at': createdAt.toIso8601String(),
       'icon': icon.codePoint,
-      'hourlyRate': hourlyRate,
-      'price': price,
+      'pricePerHalfHour': pricePerHalfHour,
+      'pricePerTwoHours': pricePerTwoHours,
+      'supscriptionPrice': supscriptionPrice,
       'description': description,
     };
   }
@@ -50,17 +53,20 @@ class Bike {
       pricePerHour: map['price_per_hour'] is int
           ? (map['price_per_hour'] as int).toDouble()
           : map['price_per_hour'],
+      pricePerTwoHours: map['pricePerTwoHours'] is int
+          ? (map['pricePerTwoHours'] as int).toDouble()
+          : map['pricePerTwoHours'],
       createdAt: DateTime.parse(map['created_at']),
       icon: IconData(map['icon'], fontFamily: 'MaterialIcons'),
-      hourlyRate: map['hourlyRate'] != null
-          ? (map['hourlyRate'] is int
-              ? (map['hourlyRate'] as int).toDouble()
-              : map['hourlyRate'])
+      pricePerHalfHour: map['pricePerHalfHour'] != null
+          ? (map['pricePerHalfHour'] is int
+              ? (map['pricePerHalfHour'] as int).toDouble()
+              : map['pricePerHalfHour'])
           : null,
-      price: map['price'] != null
-          ? (map['price'] is int
-              ? (map['price'] as int).toDouble()
-              : map['price'])
+      supscriptionPrice: map['supscriptionPrice'] != null
+          ? (map['supscriptionPrice'] is int
+              ? (map['supscriptionPrice'] as int).toDouble()
+              : map['supscriptionPrice'])
           : null,
       description: map['description'],
     );

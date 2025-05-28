@@ -113,8 +113,9 @@ class DatabaseHelper {
             price_per_hour REAL NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             icon INTEGER NOT NULL,
-            hourlyRate REAL,
-            price REAL,
+            pricePerHalfHour REAL,
+            pricePerTwoHours REAL,
+            supscriptionPrice REAL,
             description TEXT
           )''');
 
@@ -167,6 +168,111 @@ class DatabaseHelper {
             .execute('CREATE INDEX idx_invoices_status ON invoices(status)');
         await txn
             .execute('CREATE INDEX idx_pricing_type ON pricing(bike_type)');
+
+        // إضافة بيانات الدراجات الأولية
+        final List<Map<String, dynamic>> initialBikes = [
+          {
+            'id': 1,
+            'name': 'دراجة جبلية',
+            'icon': 0xeb29, // Icons.pedal_bike
+            'pricePerHalfHour': 25.0,
+            'pricePerTwoHours': 60.0,
+            'supscriptionPrice': 100.0,
+            'description': 'دراجة جبلية مناسبة للرحلات الطويلة',
+            'type': 'جبلية',
+            'status': 'متاحة',
+            'price_per_hour': 12.0,
+          },
+          {
+            'id': 2,
+            'name': 'دراجة كهربائية',
+            'icon': 0xeb1b, // Icons.electric_bike_sharp
+            'pricePerHalfHour': 25.0,
+            'pricePerTwoHours': 60.0,
+            'supscriptionPrice': 100.0,
+            'description': 'دراجة كهربائية سريعة وموفرة للطاقة',
+            'type': 'كهربائية',
+            'status': 'متاحة',
+            'price_per_hour': 15.0,
+          },
+          {
+            'id': 3,
+            'name': 'دراجة أطفال',
+            'icon': 0xeb29, // Icons.pedal_bike
+            'pricePerHalfHour': 25.0,
+            'pricePerTwoHours': 60.0,
+            'supscriptionPrice': 100.0,
+            'description': 'دراجة آمنة ومناسبة للأطفال',
+            'type': 'أطفال',
+            'status': 'متاحة',
+            'price_per_hour': 8.0,
+          },
+          {
+            'id': 4,
+            'name': 'دراجة سباق',
+            'icon': 0xe9f9, // Icons.two_wheeler
+            'pricePerHalfHour': 25.0,
+            'pricePerTwoHours': 60.0,
+            'supscriptionPrice': 100.0,
+            'description': 'دراجة خفيفة وسريعة لعشاق السباقات',
+            'type': 'سباق',
+            'status': 'متاحة',
+            'price_per_hour': 14.0,
+          },
+          {
+            'id': 5,
+            'name': 'دراجة طريق',
+            'icon': 0xe52f, // Icons.directions_bike
+            'pricePerHalfHour': 25.0,
+            'pricePerTwoHours': 60.0,
+            'supscriptionPrice': 100.0,
+            'description': 'مناسبة للتنقل داخل المدينة وعلى الطرق المعبدة',
+            'type': 'طريق',
+            'status': 'متاحة',
+            'price_per_hour': 13.0,
+          },
+          {
+            'id': 6,
+            'name': 'دراجة قابلة للطي',
+            'icon': 0xe52f,
+            'pricePerHalfHour': 25.0,
+            'pricePerTwoHours': 60.0,
+            'supscriptionPrice': 100.0,
+            'description': 'مناسبة للتخزين والتنقل السهل',
+            'type': 'قابلة للطي',
+            'status': 'متاحة',
+            'price_per_hour': 11.0,
+          },
+          {
+            'id': 7,
+            'name': 'دراجة ثلاثية العجلات',
+            'icon': 0xe52f,
+            'pricePerHalfHour': 25.0,
+            'pricePerTwoHours': 60.0,
+            'supscriptionPrice': 100.0,
+            'description': 'مثالية للأطفال وكبار السن أو ذوي الاحتياجات الخاصة',
+            'type': 'ثلاثية',
+            'status': 'متاحة',
+            'price_per_hour': 9.0,
+          },
+          {
+            'id': 8,
+            'name': 'سكوتر كهربائي',
+            'icon': 0xeb1f,
+            'pricePerHalfHour': 25.0,
+            'pricePerTwoHours': 60.0,
+            'supscriptionPrice': 100.0,
+            'description': 'سكوتر للتنقل السريع في المسافات القصيرة',
+            'type': 'سكوتر',
+            'status': 'متاحة',
+            'price_per_hour': 10.0,
+          },
+        ];
+
+        // إدراج البيانات في جدول الدراجات
+        for (var bike in initialBikes) {
+          await txn.insert('bikes', bike);
+        }
       });
     } catch (e) {
       throw CustomDatabaseException(

@@ -29,13 +29,14 @@ class _ManageBikesScreenState extends State<ManageBikesScreen> {
 
   void _showAddBikeDialog() {
     final nameController = TextEditingController();
-    final hourlyRateController = TextEditingController();
-    final priceController = TextEditingController();
+    final pricePerHalfHourController = TextEditingController();
+    final supscriptionPriceController = TextEditingController();
     final descriptionController = TextEditingController();
     final typeController = TextEditingController();
     final statusController = TextEditingController();
     final iconController = TextEditingController();
     final pricePerHourController = TextEditingController();
+    final pricePerTwoHoursController = TextEditingController();
 
     showDialog(
       context: context,
@@ -48,12 +49,15 @@ class _ManageBikesScreenState extends State<ManageBikesScreen> {
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'اسم الدراجة'),
+                textDirection: TextDirection.rtl,
               ),
               TextField(
                 controller: typeController,
                 decoration: const InputDecoration(
                     labelText: 'النوع (مثال: جبلية، كهربائية)'),
+                textDirection: TextDirection.rtl,
               ),
+              // Apply to all other TextFields as well
               TextField(
                 controller: statusController,
                 decoration:
@@ -61,19 +65,23 @@ class _ManageBikesScreenState extends State<ManageBikesScreen> {
               ),
               TextField(
                 controller: pricePerHourController,
-                decoration:
-                    const InputDecoration(labelText: 'سعر الساعة (الحقيقي)'),
+                decoration: const InputDecoration(labelText: 'سعر الساعة'),
                 keyboardType: TextInputType.number,
               ),
               TextField(
-                controller: hourlyRateController,
-                decoration:
-                    const InputDecoration(labelText: 'سعر الساعة (اختياري)'),
+                controller: pricePerHalfHourController,
+                decoration: const InputDecoration(labelText: 'سعر نصف ساعة '),
                 keyboardType: TextInputType.number,
               ),
               TextField(
-                controller: priceController,
-                decoration: const InputDecoration(labelText: 'السعر (اختياري)'),
+                controller: pricePerTwoHoursController,
+                decoration: const InputDecoration(labelText: 'سعر الساعتين '),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: supscriptionPriceController,
+                decoration:
+                    const InputDecoration(labelText: 'سعر الإشتراك الشهري'),
                 keyboardType: TextInputType.number,
               ),
               TextField(
@@ -103,8 +111,12 @@ class _ManageBikesScreenState extends State<ManageBikesScreen> {
                 icon: Icons.electric_scooter,
                 pricePerHour:
                     double.tryParse(pricePerHourController.text) ?? 0.0,
-                hourlyRate: double.tryParse(hourlyRateController.text),
-                price: double.tryParse(priceController.text),
+                pricePerHalfHour:
+                    double.tryParse(pricePerHalfHourController.text),
+                pricePerTwoHours:
+                    double.tryParse(pricePerTwoHoursController.text),
+                supscriptionPrice:
+                    double.tryParse(supscriptionPriceController.text),
                 description: descriptionController.text,
                 //icon: iconController.text.isNotEmpty ? iconController.text : null,
               );
@@ -148,8 +160,13 @@ class _ManageBikesScreenState extends State<ManageBikesScreen> {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (bike.pricePerHalfHour != null)
+                    Text('سعر نصف ساعة: ${bike.pricePerHalfHour} ريال'),
                   Text('سعر الساعة: ${bike.pricePerHour} ريال'),
-                  if (bike.price != null) Text('السعر: ${bike.price} ريال'),
+                  if (bike.pricePerTwoHours != null)
+                    Text('سعر ساعتين: ${bike.pricePerTwoHours} ريال'),
+                  if (bike.supscriptionPrice != null)
+                    Text('سعر الإشتراك الشهري: ${bike.supscriptionPrice} ريال'),
                   if (bike.description != null) Text(bike.description!),
                 ],
               ),
