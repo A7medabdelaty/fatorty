@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -336,70 +337,162 @@ class _InvoicePageState extends State<InvoicePage> {
     return (difference.inMinutes).ceil(); // تقريب لأقرب ساعة
   }
 
+  Future<Uint8List> _processImageInBackground(Uint8List bytes) async {
+    return await compute((Uint8List bytes) {
+      final img.Image? original = img.decodeImage(bytes);
+      if (original == null) return Uint8List(0);
+
+      // Reduce quality and optimize for thermal printing
+      final grayscale = img.grayscale(original);
+
+      // Lower quality for faster processing and printing
+      return Uint8List.fromList(img.encodeJpg(grayscale, quality: 50));
+    }, bytes);
+  }
+
+  Uint8List? _cachedLogoImage;
+
+  Future<Uint8List> _getProcessedLogo() async {
+    // Return cached image if available
+    if (_cachedLogoImage != null && _cachedLogoImage!.isNotEmpty) {
+      return _cachedLogoImage!;
+    }
+
+    try {
+      final byteData = await rootBundle.load('assets/images/printing_logo.jpg');
+      final bytes = byteData.buffer.asUint8List();
+      _cachedLogoImage = await _processImageInBackground(bytes);
+      return _cachedLogoImage!;
+    } catch (e) {
+      print('Error loading logo: $e');
+      return Uint8List(0);
+    }
+  }
+
   Future<void> _printReceiptToSunmiPrinter() async {
-    await SunmiPrinter.bindingPrinter();
+    try {
+      // Initialize printer only once
+      await SunmiPrinter.bindingPrinter();
 
-    final byteData = await rootBundle.load('assets/images/logo.jpg');
-    final bytes = byteData.buffer.asUint8List();
-    img.Image? original = img.decodeImage(bytes);
+      // Start transaction print to improve performance
+      await SunmiPrinter.startTransactionPrint(true);
 
-    final now = DateTime.now();
+      // Get cached logo
+      final grayscaleBytes = await _getProcessedLogo();
 
-    // --- Header with Logo and Business Name ---
-    await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-    if (original != null) {
-      img.Image grayscale = img.grayscale(original);
-      final grayscaleBytes = img.encodeJpg(grayscale);
-      await SunmiPrinter.printImage(grayscaleBytes);
+      final now = DateTime.now();
+
+      // Header with Logo
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+      if (grayscaleBytes.isNotEmpty) {
+        await SunmiPrinter.printImage(grayscaleBytes);
+      }
+
+      // Reduce font size to speed up printing
+      await SunmiPrinter.printText('الدراجات BIKE',
+          style: SunmiTextStyle(fontSize: 24, bold: true));
+      await SunmiPrinter.line();
+
+      // Combine multiple text lines into fewer printing operations
+      final businessInfo = [
+        'مؤسسة عائلة دراوي محمد دخان لتأجير الدراجات',
+        'Dammam Life Park - الدمام - لايف بارك',
+        'رقم التسجيل: 1-27846',
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}  ${now.hour}:${now.minute.toString().padLeft(2, '0')}',
+        'الطلب: 1',
+        'الكاشير: cachier1',
+        'جهاز: POS-02'
+      ];
+      final businessRules = [
+        'الشروط و الأحكام:',
+        '1- يتحمل المستأجر كامل الأضرار أو تلف.',
+        '2- يرجى تقديم بطاقة الهوية لمحمد لتسليم الدراجة.',
+        '3- عدم استخدام الدراجة في منطقة الحديقة الخارجية.'
+            '3- عدم استخدام الدراجة في منطقة الحديقة الخارجية.',
+        '4- المستأجر مسؤول عن سلوكياته في الركاب وممتلكات الغير.',
+        '5- المؤسسة غير مسؤولة عن الحوادث خارج الحديقة.',
+      ];
+
+      // Print multiple lines at once
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+      await SunmiPrinter.printText(businessInfo.join('\n'));
+      await SunmiPrinter.line();
+
+      // Business Info
+      // await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+      // await SunmiPrinter.printText(
+      //     'مؤسسة عائلة دراوي محمد دخان لتأجير الدراجات');
+      // await SunmiPrinter.printText('Dammam Life Park - الدمام - لايف بارك');
+      // await SunmiPrinter.printText('رقم التسجيل: 1-27846');
+      // await SunmiPrinter.printText(
+      //     '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}  ${now.hour}:${now.minute.toString().padLeft(2, '0')}');
+      // await SunmiPrinter.printText('الطلب: 1');
+      // await SunmiPrinter.printText('الكاشير: cachier1');
+      // await SunmiPrinter.printText('جهاز: POS-02');
+      // await SunmiPrinter.line();
+
+      // Items
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
+      for (var entry in widget.selectedBikes.entries) {
+        final bike = entry.key;
+        final quantity = entry.value;
+        final duration = widget.selectedDurations[bike] ?? '';
+        final price = widget.durationPrices[duration] ?? 0;
+        final totalPrice = price * quantity;
+
+        // First line: Item title (with duration if any)
+        await SunmiPrinter.printText('${bike.name} $duration');
+
+        // Add start time and end time
+        final startTime = widget.pickupTime;
+        final endTime = widget.deliveryTimes[bike];
+        final startTimeStr =
+            '${startTime.hour}:${startTime.minute.toString().padLeft(2, '0')}';
+        final endTimeStr = endTime != null
+            ? '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}'
+            : 'غير محدد';
+        await SunmiPrinter.printText(
+            'وقت البدء: $startTimeStr - وقت الانتهاء: $endTimeStr');
+
+        // Second line: Quantity × unit = total
+        await SunmiPrinter.printText(
+            '$quantity x ${price.toStringAsFixed(2)} SAR  =  ${totalPrice.toStringAsFixed(2)} SAR');
+      }
+      await SunmiPrinter.line();
+
+      // Total summary
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.RIGHT);
+      await SunmiPrinter.printText(
+          'الإجمالي     ${widget.totalAmount.toStringAsFixed(2)} SAR',
+          style: SunmiTextStyle(bold: true));
+      await SunmiPrinter.printText('طريقة الدفع: Card');
+      await SunmiPrinter.line();
+
+      // Terms & Conditions (aligned right)
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.RIGHT);
+      // await SunmiPrinter.printText('الشروط و الأحكام:');
+      // await SunmiPrinter.printText('1- يتحمل المستأجر كامل الأضرار أو تلف.');
+      // await SunmiPrinter.printText(
+      //     '2- يرجى تقديم بطاقة الهوية لمحمد لتسليم الدراجة.');
+      // await SunmiPrinter.printText(
+      //     '3- عدم استخدام الدراجة في منطقة الحديقة الخارجية.');
+      // await SunmiPrinter.printText(
+      //     '4- المستأجر مسؤول عن سلوكياته في الركاب وممتلكات الغير.');
+      // await SunmiPrinter.printText(
+      //     '5- المؤسسة غير مسؤولة عن الحوادث خارج الحديقة.');
+      await SunmiPrinter.printText(businessRules.join('\n'));
+
+      await SunmiPrinter.line();
+
+      // Footer
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+      await SunmiPrinter.printText('0541642611');
+      await SunmiPrinter.printText('شكرًا لكم!');
+      await SunmiPrinter.lineWrap(3);
+      await SunmiPrinter.cutPaper();
+    } catch (e) {
+      print('Printing error: $e');
     }
-    await SunmiPrinter.printText('الدراجات BIKE',
-        style: SunmiTextStyle(fontSize: 28, bold: true));
-    await SunmiPrinter.line();
-    await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
-    await SunmiPrinter.printText('مؤسسة عائلة دراوي محمد دخان لتأجير الدراجات');
-    await SunmiPrinter.printText('الدمام - لايف بارك');
-    await SunmiPrinter.printText('رقم التسجيل: 1-27375-1');
-    await SunmiPrinter.printText(
-        'التاريخ: ${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ${now.hour}:${now.minute.toString().padLeft(2, '0')}');
-    // await SunmiPrinter.printText('رقم الطلب: ${widget.orderNumber ?? "-"}');
-    // await SunmiPrinter.printText('الكاشير: ${widget.cashierName ?? "-"}');
-    await SunmiPrinter.line();
-
-    // --- Bike Details ---
-    await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
-    for (var entry in widget.selectedBikes.entries) {
-      final bike = entry.key;
-      final quantity = entry.value;
-      final duration = widget.selectedDurations[bike] ?? '';
-      final price = widget.durationPrices[duration] ?? 0;
-      await SunmiPrinter.printText('${bike.name} × $quantity  $duration');
-      await SunmiPrinter.printText('السعر: ${price * quantity} SAR');
-    }
-    await SunmiPrinter.line();
-
-    // --- Total and Payment ---
-    await SunmiPrinter.setAlignment(SunmiPrintAlign.RIGHT);
-    await SunmiPrinter.printText('الإجمالي: ${widget.totalAmount} SAR');
-    await SunmiPrinter.printText('طريقة الدفع: Card');
-    await SunmiPrinter.line();
-
-    // --- Terms and Conditions ---
-    await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
-    await SunmiPrinter.printText('الشروط والأحكام:');
-    await SunmiPrinter.printText('1- يتحمل المستأجر أي أضرار أو تلف.');
-    await SunmiPrinter.printText('2- يجب الإلتزام بالوقت المحدد للإيجار.');
-    await SunmiPrinter.printText('3- يمنع إعطاء الدراجة لشخص آخر.');
-    await SunmiPrinter.printText('4- يجب إبراز الهوية عند الإستئجار.');
-    await SunmiPrinter.printText(
-        '5- الشركة غير مسؤولة عن الحوادث خارج الحديقة.');
-    await SunmiPrinter.line();
-
-    // --- Footer ---
-    await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-    await SunmiPrinter.printText('0541642611');
-    await SunmiPrinter.printText('شكرًا لكم!');
-    await SunmiPrinter.lineWrap(3);
-    await SunmiPrinter.cutPaper();
   }
 
   int getTotalDurationInMinutes() {
