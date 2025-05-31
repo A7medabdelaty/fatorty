@@ -259,10 +259,7 @@ class _InvoicePageState extends State<InvoicePage> {
       // 2. حفظ الفاتورة لكل دراجة
       for (var entry in widget.selectedBikes.entries) {
         final bike = entry.key;
-        final quantity = entry.value;
-        final duration = widget.selectedDurations[bike] ?? '30 دقيقة';
-        final price = widget.durationPrices[duration] ?? 0;
-        final totalAmount = price * quantity * (bike.pricePerHour / 60);
+        final totalAmount = widget.totalAmount;
 
         // استخدام قيمة افتراضية للكاشير (1) حتى يتم تنفيذ نظام المصادقة الكامل
         // في التطبيق الحقيقي، يجب الحصول على معرف الكاشير من نظام المصادقة

@@ -75,9 +75,7 @@ class _CartPageState extends State<CartPage> {
 
         switch (duration) {
           case '15 دقيقة':
-            // 15-minute price is half-hour price divided by 0.5
-            durationPrice =
-                ((bike.pricePerHalfHour ?? (bike.pricePerHour / 2)) / 0.5);
+            durationPrice = bike.pricePerQuarterHour ?? bike.pricePerHour / 4;
             break;
           case '30 دقيقة':
             durationPrice = bike.pricePerHalfHour ?? (bike.pricePerHour / 2);
@@ -94,7 +92,6 @@ class _CartPageState extends State<CartPage> {
             durationPrice = (durationMinutes * (bike.pricePerHour / 60));
             break;
         }
-
         total += durationPrice * quantity;
       }
     });
@@ -127,10 +124,25 @@ class _CartPageState extends State<CartPage> {
     }
   }
 
+  double getPriceBasedOnDuration(String duration, Bike bike) {
+    switch (duration) {
+      case '15 دقيقة':
+        return bike.pricePerQuarterHour ?? (bike.pricePerHour / 4);
+      case '30 دقيقة':
+        return bike.pricePerHalfHour ?? (bike.pricePerHour / 2);
+      case 'ساعة واحدة':
+        return bike.pricePerHour;
+      case 'ساعتين':
+        return bike.pricePerTwoHours ?? (bike.pricePerHour * 2);
+      default:
+        return bike.pricePerHour;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final total = calculateTotal();
-
+    List<String> selectedDuration = [];
     return Scaffold(
       appBar: const CustomAppBar(title: 'السلة'),
       body: Column(
@@ -181,7 +193,7 @@ class _CartPageState extends State<CartPage> {
                                   Text(duration),
                                   Text(widget.isSubscription
                                       ? '${bike.supscriptionPrice! * (_durationPrices[duration]! == 30 ? 1 : 0.6)} ريال'
-                                      : '${_durationPrices[duration]! * bike.pricePerHour / 60} ريال'),
+                                      : '${getPriceBasedOnDuration(duration, bike)} ريال'),
                                 ],
                               ),
                             );
@@ -201,7 +213,7 @@ class _CartPageState extends State<CartPage> {
                             Text(
                               widget.isSubscription
                                   ? '${(bike.supscriptionPrice! * (_durationPrices[currentDuration]! == 30 ? 1 : 0.6) * quantity)} ريال'
-                                  : '${((_durationPrices[currentDuration]! * bike.pricePerHour / 60) * quantity)} ريال',
+                                  : '${(getPriceBasedOnDuration(_selectedDurations[bike]!, bike) * quantity)} ريال',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,

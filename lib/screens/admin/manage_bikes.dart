@@ -36,6 +36,7 @@ class _ManageBikesScreenState extends State<ManageBikesScreen> {
     final statusController = TextEditingController();
     final iconController = TextEditingController();
     final pricePerHourController = TextEditingController();
+    final pricePerQuarterHourController = TextEditingController();
     final pricePerTwoHoursController = TextEditingController();
 
     showDialog(
@@ -66,6 +67,11 @@ class _ManageBikesScreenState extends State<ManageBikesScreen> {
               TextField(
                 controller: pricePerHourController,
                 decoration: const InputDecoration(labelText: 'سعر الساعة'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: pricePerQuarterHourController,
+                decoration: const InputDecoration(labelText: 'سعر ربع ساعة'),
                 keyboardType: TextInputType.number,
               ),
               TextField(
@@ -113,6 +119,8 @@ class _ManageBikesScreenState extends State<ManageBikesScreen> {
                     double.tryParse(pricePerHourController.text) ?? 0.0,
                 pricePerHalfHour:
                     double.tryParse(pricePerHalfHourController.text),
+                pricePerQuarterHour:
+                    double.tryParse(pricePerQuarterHourController.text),
                 pricePerTwoHours:
                     double.tryParse(pricePerTwoHoursController.text),
                 supscriptionPrice:

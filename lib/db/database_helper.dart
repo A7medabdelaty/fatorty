@@ -114,6 +114,7 @@ class DatabaseHelper {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             icon INTEGER NOT NULL,
             pricePerHalfHour REAL,
+            pricePerQuarterHour REAL,
             pricePerTwoHours REAL,
             supscriptionPrice REAL,
             description TEXT
@@ -140,10 +141,7 @@ class DatabaseHelper {
             total_hours INTEGER,
             total_amount REAL,
             status TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (cashier_id) REFERENCES cashiers (id) ON DELETE CASCADE,
-            FOREIGN KEY (bike_id) REFERENCES bikes (id) ON DELETE CASCADE,
-            FOREIGN KEY (customer_id) REFERENCES customers (id) ON DELETE CASCADE
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           )''');
 
         // جدول الأسعار
@@ -174,8 +172,9 @@ class DatabaseHelper {
           {
             'id': 1,
             'name': 'دراجة جبلية',
-            'icon': 0xeb29, // Icons.pedal_bike
+            'icon': 0xe483, // Icons.pedal_bike
             'pricePerHalfHour': 25.0,
+            'pricePerQuarterHour': 15.0,
             'pricePerTwoHours': 60.0,
             'supscriptionPrice': 100.0,
             'description': 'دراجة جبلية مناسبة للرحلات الطويلة',
@@ -186,8 +185,9 @@ class DatabaseHelper {
           {
             'id': 2,
             'name': 'دراجة كهربائية',
-            'icon': 0xeb1b, // Icons.electric_bike_sharp
+            'icon': 0xe223, // Icons.electric_bike_sharp
             'pricePerHalfHour': 25.0,
+            'pricePerQuarterHour': 15.0,
             'pricePerTwoHours': 60.0,
             'supscriptionPrice': 100.0,
             'description': 'دراجة كهربائية سريعة وموفرة للطاقة',
@@ -198,8 +198,9 @@ class DatabaseHelper {
           {
             'id': 3,
             'name': 'دراجة أطفال',
-            'icon': 0xeb29, // Icons.pedal_bike
+            'icon': 0xe483, // Icons.pedal_bike
             'pricePerHalfHour': 25.0,
+            'pricePerQuarterHour': 15.0,
             'pricePerTwoHours': 60.0,
             'supscriptionPrice': 100.0,
             'description': 'دراجة آمنة ومناسبة للأطفال',
@@ -210,8 +211,9 @@ class DatabaseHelper {
           {
             'id': 4,
             'name': 'دراجة سباق',
-            'icon': 0xe9f9, // Icons.two_wheeler
+            'icon': 0xe689, // Icons.two_wheeler
             'pricePerHalfHour': 25.0,
+            'pricePerQuarterHour': 15.0,
             'pricePerTwoHours': 60.0,
             'supscriptionPrice': 100.0,
             'description': 'دراجة خفيفة وسريعة لعشاق السباقات',
@@ -222,8 +224,9 @@ class DatabaseHelper {
           {
             'id': 5,
             'name': 'دراجة طريق',
-            'icon': 0xe52f, // Icons.directions_bike
+            'icon': 0xe1d2, // Icons.directions_bike
             'pricePerHalfHour': 25.0,
+            'pricePerQuarterHour': 15.0,
             'pricePerTwoHours': 60.0,
             'supscriptionPrice': 100.0,
             'description': 'مناسبة للتنقل داخل المدينة وعلى الطرق المعبدة',
@@ -236,6 +239,7 @@ class DatabaseHelper {
             'name': 'دراجة قابلة للطي',
             'icon': 0xe52f,
             'pricePerHalfHour': 25.0,
+            'pricePerQuarterHour': 15.0,
             'pricePerTwoHours': 60.0,
             'supscriptionPrice': 100.0,
             'description': 'مناسبة للتخزين والتنقل السهل',
@@ -246,8 +250,9 @@ class DatabaseHelper {
           {
             'id': 7,
             'name': 'دراجة ثلاثية العجلات',
-            'icon': 0xe52f,
+            'icon': 0xe689,
             'pricePerHalfHour': 25.0,
+            'pricePerQuarterHour': 15.0,
             'pricePerTwoHours': 60.0,
             'supscriptionPrice': 100.0,
             'description': 'مثالية للأطفال وكبار السن أو ذوي الاحتياجات الخاصة',
@@ -258,8 +263,9 @@ class DatabaseHelper {
           {
             'id': 8,
             'name': 'سكوتر كهربائي',
-            'icon': 0xeb1f,
+            'icon': 0xe227,
             'pricePerHalfHour': 25.0,
+            'pricePerQuarterHour': 15.0,
             'pricePerTwoHours': 60.0,
             'supscriptionPrice': 100.0,
             'description': 'سكوتر للتنقل السريع في المسافات القصيرة',

@@ -10,6 +10,7 @@ class Bike {
   // خصائص اختيارية لبعض الشاشات
   final IconData icon;
   final double? pricePerHalfHour;
+  final double? pricePerQuarterHour;
   final double? pricePerTwoHours;
   final double? supscriptionPrice;
   final String? description;
@@ -23,6 +24,7 @@ class Bike {
     DateTime? createdAt,
     required this.icon,
     this.pricePerHalfHour,
+    this.pricePerQuarterHour,
     this.pricePerTwoHours,
     this.supscriptionPrice,
     this.description,
@@ -38,6 +40,7 @@ class Bike {
       'created_at': createdAt.toIso8601String(),
       'icon': icon.codePoint,
       'pricePerHalfHour': pricePerHalfHour,
+      'pricePerQuarterHour': pricePerQuarterHour,
       'pricePerTwoHours': pricePerTwoHours,
       'supscriptionPrice': supscriptionPrice,
       'description': description,
@@ -53,6 +56,9 @@ class Bike {
       pricePerHour: map['price_per_hour'] is int
           ? (map['price_per_hour'] as int).toDouble()
           : map['price_per_hour'],
+      pricePerQuarterHour: map['pricePerQuarterHour'] is int
+          ? (map['pricePerQuarterHour'] as int).toDouble()
+          : map['pricePerQuarterHour'],
       pricePerTwoHours: map['pricePerTwoHours'] is int
           ? (map['pricePerTwoHours'] as int).toDouble()
           : map['pricePerTwoHours'],
