@@ -359,7 +359,7 @@ class _InvoicePageState extends State<InvoicePage> {
     }
 
     try {
-      final byteData = await rootBundle.load('assets/images/printing_logo.jpg');
+      final byteData = await rootBundle.load('assets/images/printing_logo.png');
       final bytes = byteData.buffer.asUint8List();
       _cachedLogoImage = await _processImageInBackground(bytes);
       return _cachedLogoImage!;
@@ -367,6 +367,12 @@ class _InvoicePageState extends State<InvoicePage> {
       print('Error loading logo: $e');
       return Uint8List(0);
     }
+  }
+
+  String formatLine(String left, String right) {
+    const int totalWidth = 37;
+    int space = totalWidth - left.length - right.length;
+    return left + ' ' * space + right;
   }
 
   Future<void> _printReceiptToSunmiPrinter() async {
@@ -387,28 +393,23 @@ class _InvoicePageState extends State<InvoicePage> {
       if (grayscaleBytes.isNotEmpty) {
         await SunmiPrinter.printImage(grayscaleBytes);
       }
-
-      // Reduce font size to speed up printing
-      await SunmiPrinter.printText('الدراجات BIKE',
-          style: SunmiTextStyle(fontSize: 24, bold: true));
       await SunmiPrinter.line();
 
       // Combine multiple text lines into fewer printing operations
       final businessInfo = [
-        'مؤسسة عائلة دراوي محمد دخان لتأجير الدراجات',
+        'مؤسسة عائشة تراوري محمد مختار لتأجير الدراجات',
         'Dammam Life Park - الدمام - لايف بارك',
-        'رقم التسجيل: 1-27846',
+        'رقم الإيصال: 1-27846',
         '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}  ${now.hour}:${now.minute.toString().padLeft(2, '0')}',
-        'الطلب: 1',
         'الكاشير: cachier1',
-        'جهاز: POS-02'
+        'جهاز: POS-02',
+        'وقت البدء: ${widget.pickupTime.hour}:${widget.pickupTime.minute.toString().padLeft(2, '0')}'
       ];
       final businessRules = [
         'الشروط و الأحكام:',
-        '1- يتحمل المستأجر كامل الأضرار أو تلف.',
+        '1- يتحمل المستأجر كامل الأضرار أو تلف',
         '2- يرجى تقديم بطاقة الهوية لمحمد لتسليم الدراجة.',
-        '3- عدم استخدام الدراجة في منطقة الحديقة الخارجية.'
-            '3- عدم استخدام الدراجة في منطقة الحديقة الخارجية.',
+        '3- عدم استخدام الدراجة في منطقة الحديقة الخارجية.',
         '4- المستأجر مسؤول عن سلوكياته في الركاب وممتلكات الغير.',
         '5- المؤسسة غير مسؤولة عن الحوادث خارج الحديقة.',
       ];
@@ -416,7 +417,10 @@ class _InvoicePageState extends State<InvoicePage> {
       // Print multiple lines at once
       await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
       await SunmiPrinter.printText(businessInfo.join('\n'));
+      await SunmiPrinter.lineWrap(1);
+      await SunmiPrinter.line(type: 'solid');
       await SunmiPrinter.line();
+      await SunmiPrinter.lineWrap(1);
 
       // Business Info
       // await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
@@ -432,7 +436,7 @@ class _InvoicePageState extends State<InvoicePage> {
       // await SunmiPrinter.line();
 
       // Items
-      await SunmiPrinter.setAlignment(SunmiPrintAlign.LEFT);
+      await SunmiPrinter.setAlignment(SunmiPrintAlign.RIGHT);
       for (var entry in widget.selectedBikes.entries) {
         final bike = entry.key;
         final quantity = entry.value;
@@ -441,7 +445,7 @@ class _InvoicePageState extends State<InvoicePage> {
         final totalPrice = price * quantity;
 
         // First line: Item title (with duration if any)
-        await SunmiPrinter.printText('${bike.name} $duration');
+        await SunmiPrinter.printText(formatLine(bike.name, duration));
 
         // Add start time and end time
         final startTime = widget.pickupTime;
@@ -451,20 +455,24 @@ class _InvoicePageState extends State<InvoicePage> {
         final endTimeStr = endTime != null
             ? '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}'
             : 'غير محدد';
-        await SunmiPrinter.printText(
-            'وقت البدء: $startTimeStr - وقت الانتهاء: $endTimeStr');
+        await SunmiPrinter.printText(formatLine('وقت الانتهاء: ', endTimeStr));
 
         // Second line: Quantity × unit = total
         await SunmiPrinter.printText(
             '$quantity x ${price.toStringAsFixed(2)} SAR  =  ${totalPrice.toStringAsFixed(2)} SAR');
+        await SunmiPrinter.lineWrap(1);
       }
+      await SunmiPrinter.lineWrap(1);
+      await SunmiPrinter.line(type: 'solid');
       await SunmiPrinter.line();
+      await SunmiPrinter.lineWrap(1);
 
       // Total summary
       await SunmiPrinter.setAlignment(SunmiPrintAlign.RIGHT);
       await SunmiPrinter.printText(
-          'الإجمالي     ${widget.totalAmount.toStringAsFixed(2)} SAR',
-          style: SunmiTextStyle(bold: true));
+        formatLine('الإجمالي', '${widget.totalAmount.toStringAsFixed(2)} SAR'),
+        style: SunmiTextStyle(bold: true, fontSize: 28),
+      );
       await SunmiPrinter.printText('طريقة الدفع: Card');
       await SunmiPrinter.line();
 
@@ -480,14 +488,34 @@ class _InvoicePageState extends State<InvoicePage> {
       //     '4- المستأجر مسؤول عن سلوكياته في الركاب وممتلكات الغير.');
       // await SunmiPrinter.printText(
       //     '5- المؤسسة غير مسؤولة عن الحوادث خارج الحديقة.');
-      await SunmiPrinter.printText(businessRules.join('\n'));
+      await SunmiPrinter.printText(
+        businessRules.join('\n'),
+        style: SunmiTextStyle(
+          align: SunmiPrintAlign.CENTER,
+        ),
+      );
 
+      await SunmiPrinter.lineWrap(1);
+      await SunmiPrinter.line(type: 'solid');
       await SunmiPrinter.line();
+      await SunmiPrinter.lineWrap(1);
 
       // Footer
       await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
-      await SunmiPrinter.printText('0541642611');
-      await SunmiPrinter.printText('شكرًا لكم!');
+      await SunmiPrinter.printText(
+        '0541642611',
+        style: SunmiTextStyle(
+          align: SunmiPrintAlign.CENTER,
+          bold: true,
+        ),
+      );
+      await SunmiPrinter.printText(
+        'شكرًا لكم!',
+        style: SunmiTextStyle(
+          align: SunmiPrintAlign.CENTER,
+          bold: true,
+        ),
+      );
       await SunmiPrinter.lineWrap(3);
       await SunmiPrinter.cutPaper();
     } catch (e) {
